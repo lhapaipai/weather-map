@@ -188,20 +188,6 @@ clipX = 2 * x - 1
 clipY = (-1) * (2 * y - 1) // le -1 permet de considérer l'origine en haut à gauche.
 ```
 
-## Explications spécifiques
-
-pour une texture de 2px x 2px
-
-```diff
-texture(u_texture, vec2(0., 0.)) // pixel (0, 0)
-texture(u_texture, vec2(0.499, 0.499)) //nous renvoie toujours au pixel (0, 0)
-
-vec4 pos_color = texture(u_particle_position_current, vec2(
-  fract(a_index/u_tex_width),
--  floor(a_index/u_tex_width) / u_tex_width
-+  ceil(a_index/u_tex_width) / u_tex_width
-));
-```
 
 ## Debug
 
