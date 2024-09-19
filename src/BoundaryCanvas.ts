@@ -34,8 +34,8 @@ export default class BoundaryCanvas {
       for (let j = 0; j < outerPolygon.length; j++) {
         const line = outerPolygon[j];
         ctx[j ? "lineTo" : "moveTo"](
-          ((line[0] - bbox[0]) * canvas.clientWidth) / (bbox[2] - bbox[0]),
-          (-1 * (line[1] - bbox[3]) * canvas.clientHeight) / (bbox[3] - bbox[1]),
+          (((line[0] - bbox[0]) * canvas.clientWidth) / (bbox[2] - bbox[0])) * pxRatio,
+          ((-1 * (line[1] - bbox[3]) * canvas.clientHeight) / (bbox[3] - bbox[1])) * pxRatio,
         );
       }
       ctx.stroke();
