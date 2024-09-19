@@ -36,9 +36,9 @@ const windSpeedRampColor = {
 };
 
 Promise.all([
-  fetch("/metropole.geojson").then((res) => res.json()) as Promise<Feature<MultiPolygon>>,
-  fetch(`/${windFile}.json`).then((res) => res.json()) as Promise<WindData>,
-  dataImageLoader(`/${windFile}.png`) as Promise<HTMLImageElement>,
+  fetch("/wind-map/metropole.geojson").then((res) => res.json()) as Promise<Feature<MultiPolygon>>,
+  fetch(`/wind-map/${windFile}.json`).then((res) => res.json()) as Promise<WindData>,
+  dataImageLoader(`/wind-map/${windFile}.png`) as Promise<HTMLImageElement>,
 ]).then(([metropoleData, windData, windImage]) => {
   const boundaryCanvas = document.querySelector<HTMLCanvasElement>("#boundary")!;
   new BoundaryCanvas(boundaryCanvas, metropoleData, windData.bbox);
