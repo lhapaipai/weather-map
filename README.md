@@ -1,54 +1,80 @@
-créer un jeton sur Météo France et l'inclure dans un en-tête http : `apikey`.
+# Carte du Vent (WebGL2 + TypeScript)
 
-## Calques disponibles
+<a href="https://maplibre-react-components.pentatrion.com">
+<img src="https://raw.githubusercontent.com/lhapaipai/wind-map/main/screenshot.png" alt="Carte du Vent" />
+</a>
 
-WIND_SPEED_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND
+## Récupération des données
+
+On profitera des données ouvertes par Météo France : https://portail-api.meteofrance.fr
+
+On se rendra donc dans la section :
+
+- Prévision
+  - Modèle AROME Prévision Immédiate.
+
+on effectuera des requêtes `WCS` pour récupérer des images de données au format geotiff.
+
+on cherche la meilleure résolution (même si après on la redimensionera...) on s'orientera donc vers les 3 requêtes
+
+- `/wcs/MF-NWP-HIGHRES-AROMEPI-001-FRANCE-WCS/`
+  - `GetCapabilities`  : nous donne la liste des calques disponible
+  - `DescribeCoverage` : nous donne des informations sur les paramètres à fournir pour notre requête `GetCoverage`
+  - `GetCoverage`      : requête qui permet de récupérer notre geotiff.
+
+
+Pour effectuer toutes nos requêtes il faut créer un jeton sur leur site et l'inclure dans un en-tête http : `apikey`.
+
+Après avoir effectué une requête `GetCapabilities` on sélectionne les calques qui concernent le vent.
+
+```bash
+# requête auquel on ajoutera un en-tête `apikey`.
+https://public-api.meteofrance.fr/public/aromepi/1.0/wcs/MF-NWP-HIGHRES-AROMEPI-001-FRANCE-WCS/GetCapabilities?service=WCS&version=2.0.1&language=fre
+```
+
+
+`WIND_SPEED_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
 Rafale de vent sur 15 minutes en niveaux hauteur.
 
-WIND_SPEED_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND
+`WIND_SPEED_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
 Rafale de vent en niveaux hauteur sur une heure
 
-WIND_SPEED_MAXIMUM_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND
-WIND_SPEED_MAXIMUM_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND
-suffixe:
-___2024-09-18T06.00.00Z_PT1H
-___2024-09-18T06.00.00Z_PT3H
-___2024-09-18T06.00.00Z_PT6H
+`WIND_SPEED_MAXIMUM_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
 Rafale de vent en niveaux hauteur
 
----
 
-WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND
-Direction et force de la rafale de vent sur 15 minutes en niveaux hauteur. m/s
-
-U_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND
+`U_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
 composante zonale de la rafale du vent sur 15 minutes, en niveau hauteur. m/s
 
-V_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND
-V_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z
+`V_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
 composante méridienne de la rafale du vent sur 15 minutes, en niveau hauteur. m/s
 
----
 
-WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND
-Direction et force de la rafale de vent en niveaux hauteur. m/s (instantané)
-
-U_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND
+`U_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
 composante zonale de la rafale du vent, en niveaux hauteur m/s (instantané)
 
-V_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND
+`V_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
 composante méridienne de la rafale du vent, en niveau hauteur m/s (instantané)
 
 
+On prendra donc les 2 derniers.
 
-## Récupération des composantes U et V de la rafale du vent
+- `U_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
+- `V_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
 
-GetCapabilities
 
-https://public-api.meteofrance.fr/public/aromepi/1.0/wcs/MF-NWP-HIGHRES-AROMEPI-001-FRANCE-WCS/GetCapabilities?service=WCS&version=2.0.1&language=fre
+Pour chaque calque est suffixé un horodatage et c'est la requête `GetCapabilities` qui nous donne les horodatages disponibles.
 
-Récupération d'un tiff dans l'emprise de la france métropolitaine
+- `___2024-09-18T06.00.00Z_PT1H`
+- `___2024-09-18T06.00.00Z_PT3H`
+- `___2024-09-18T06.00.00Z_PT6H`
 
+
+Récupération des composantes U et V de la rafale du vent
+
+Exemple de récupération d'un geotiff dans l'emprise de la france métropolitaine
+
+```bash
 https://public-api.meteofrance.fr/public/aromepi/1.0/wcs/MF-NWP-HIGHRES-AROMEPI-001-FRANCE-WCS/GetCoverage?
 service=WCS&
 version=2.0.1&
@@ -56,10 +82,13 @@ coverageid=U_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-0
 format=image/tiff&
 subset=long(-5.6,10.2)&
 subset=lat(40.8,52)&
-subset=time(2024-09-18T08:00:00Z)&
-subset=height(10)
+subset=time(2024-09-18T08:00:00Z)& # l'image est générée le 2024-09-18T06.00.00 et effectue une prévision pour 2024-09-18T08:00:00Z
+subset=height(10) # on se place à 10m du sol (seule valeur disponible)
+```
 
-## Traitement
+## Traitement de la donnée
+
+le traitement peut être lancé via un script semi-automatisé voir `scripts/prepare.sh`.
 
 le fichier brut fait 1581px x 1100px on va diviser sa taille par 4 : 388px x 275px.
 
@@ -177,3 +206,7 @@ vec4 pos_color = texture(u_particle_position_current, vec2(
 +  ceil(a_index/u_tex_width) / u_tex_width
 ));
 ```
+
+## Debug
+
+le dossier public contient une image de vent pour le debogage `public/wind_debug.png`.

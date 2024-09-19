@@ -8,6 +8,11 @@
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lhapaipai/wind-map"
+  },
+  "homepage": "https://lhapaipai.github.io/wind-map/",
   "devDependencies": {
     "@types/geojson": "^7946.0.14",
     "@typescript-eslint/eslint-plugin": "^7.17.0",
