@@ -1,4 +1,4 @@
-# Carte du Vent (WebGL2 + TypeScript)
+# Carte du Vent WebGL2
 
 <a href="https://maplibre-react-components.pentatrion.com">
 <img src="https://raw.githubusercontent.com/lhapaipai/wind-map/main/screenshot.png" alt="Carte du Vent" />
@@ -6,7 +6,7 @@
 
 ## Récupération des données
 
-On profitera des données ouvertes par Météo France : https://portail-api.meteofrance.fr
+On profitera des données ouvertes de Météo France : https://portail-api.meteofrance.fr
 
 On se rendra donc dans la section :
 
@@ -111,19 +111,15 @@ Certains choix sont subjectifs, voici l'explication.
 > v-component of wind m/s (instantané)
 > convention : positif pour un vent provenant du sud et négatif pour un vent provenant du nord.
 
-la donnée météo france a une précision à 2 chiffres après la virgule.
+la donnée météo france a une précision à 2 chiffres après la virgule. La vitesse maximale enregistrée pour une rafale de vent au sol sur Terre est de 110 m/s. Nous souhaiterions stocker cette information dans une image PNG. Pour être précis, il nous faudrait donc pouvoir exprimer.
 
-
-La vitesse maximale enregistrée pour une rafale de vent au sol sur Terre est de 110 m/s
-
-pour être précis, il nous faudrait donc pouvoir exprimer
-
+```
 U -> -110.00 à +110.00
 V -> -110.00 à +110.00
 
-Nous souhaiterions stocker cette information dans une image PNG.
 1 pixel = R + G + B + A
 chaque canal est codé sur 8bits: 256 valeurs
+
 2 canaux couplés = 16 bits -> 65535
 
 À partir de ces contraintes, voyons comment on va normaliser cette donnée.
@@ -132,12 +128,11 @@ U -> 0.00 à 220.00
   -> 0 à 22 000
   -> proche de 0 à 65535
 
-pareil pour V
-
-donc pour chaque composante.
+pareil pour V donc pour chaque composante.
 
 Unormalisé = U * 100 + 32768
 Vnormalisé = V * 100 + 32768 
+```
 
 stockage dans une texture
 
@@ -185,21 +180,22 @@ pour récupérer la donnée de position depuis la texture particlePositionCurren
 
 en considérant R, G, B, A entre (0 et 1)
 
+```
 x = R + B / 255
 y = G + A / 255
 
 clipX = 2 * x - 1
 clipY = (-1) * (2 * y - 1) // le -1 permet de considérer l'origine en haut à gauche.
-
+```
 
 ## Explications spécifiques
 
 pour une texture de 2px x 2px
 
+```diff
 texture(u_texture, vec2(0., 0.)) // pixel (0, 0)
 texture(u_texture, vec2(0.499, 0.499)) //nous renvoie toujours au pixel (0, 0)
 
-```diff
 vec4 pos_color = texture(u_particle_position_current, vec2(
   fract(a_index/u_tex_width),
 -  floor(a_index/u_tex_width) / u_tex_width
@@ -209,4 +205,4 @@ vec4 pos_color = texture(u_particle_position_current, vec2(
 
 ## Debug
 
-le dossier public contient une image de vent pour le debogage `public/wind_debug.png`.
+le dossier public contient une image de vent pour le debugage `public/wind_debug.png`.
