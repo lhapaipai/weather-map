@@ -10,7 +10,7 @@ out vec2 v_particle_pos;
 void main() {
   vec4 pos_color = texture(u_particle_position_current, vec2(
     fract(a_index/u_tex_width),
-    ceil(a_index/u_tex_width) / u_tex_width
+    floor(a_index/u_tex_width) / u_tex_width
   ));
 
   v_particle_pos = vec2(
