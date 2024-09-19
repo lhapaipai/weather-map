@@ -1,0 +1,34 @@
+{
+  "name": "webgl-learn",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/geojson": "^7946.0.14",
+    "@typescript-eslint/eslint-plugin": "^7.17.0",
+    "@typescript-eslint/parser": "^7.17.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.9",
+    "prettier": "^3.3.3",
+    "typescript": "^5.2.2",
+    "vite": "^5.3.1"
+  },
+  "dependencies": {
+    "@types/node": "^22.5.5",
+    "@types/pngjs": "^6.0.5",
+    "geotiff": "^2.1.3",
+    "lil-gui": "^0.19.2",
+    "pngjs": "^7.0.0",
+    "tsx": "^4.19.1",
+    "vite-plugin-glsl": "^1.3.0"
+  },
+  "volta": {
+    "node": "22.9.0"
+  }
+}
