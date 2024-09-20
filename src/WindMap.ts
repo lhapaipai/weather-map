@@ -157,8 +157,10 @@ export default class WindMap {
 
     this.drawScreen(this.previousScreenTexture, this.fadeOpacity);
     this.drawParticles();
+    this.updateParticles();
 
     bindFramebuffer(gl, null);
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -167,11 +169,14 @@ export default class WindMap {
 
     gl.disable(gl.BLEND);
 
-    const temp = this.previousScreenTexture;
+    let temp = this.previousScreenTexture;
     this.previousScreenTexture = this.screenTexture;
     this.screenTexture = temp;
 
-    this.updateParticles();
+    temp = this.particlePositionCurrent;
+    this.particlePositionCurrent = this.particlePositionNext;
+    this.particlePositionNext = temp;
+    bindTextureUnit(gl, this.particlePositionCurrent, 2);
 
     requestAnimationFrame(this.render);
   };
@@ -234,11 +239,6 @@ export default class WindMap {
     /** todo:end */
 
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-    const temp = this.particlePositionCurrent;
-    this.particlePositionCurrent = this.particlePositionNext;
-    this.particlePositionNext = temp;
-    bindTextureUnit(gl, this.particlePositionCurrent, 2);
   }
 }
 

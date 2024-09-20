@@ -31,46 +31,113 @@ Après avoir effectué une requête `GetCapabilities` on sélectionne les calque
 # requête auquel on ajoutera un en-tête `apikey`.
 https://public-api.meteofrance.fr/public/aromepi/1.0/wcs/MF-NWP-HIGHRES-AROMEPI-001-FRANCE-WCS/GetCapabilities?service=WCS&version=2.0.1&language=fre
 ```
+Liste des calques disponibles
 
-
-`WIND_SPEED_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
-Rafale de vent sur 15 minutes en niveaux hauteur.
-
-`WIND_SPEED_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
-Rafale de vent en niveaux hauteur sur une heure
-
-`WIND_SPEED_MAXIMUM_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
-Rafale de vent en niveaux hauteur
-
-
-`U_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
-composante zonale de la rafale du vent sur 15 minutes, en niveau hauteur. m/s
-
-`V_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
-composante méridienne de la rafale du vent sur 15 minutes, en niveau hauteur. m/s
-
-
-`U_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
-composante zonale de la rafale du vent, en niveaux hauteur m/s (instantané)
-
-`V_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
-composante méridienne de la rafale du vent, en niveau hauteur m/s (instantané)
-
-
-On prendra donc les 2 derniers.
-
-- `U_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
-- `V_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND`
+- Altitude de la T’W 0°C
+- Altitude de la T’W 1°C
+- Altitude de la T’W 1,5°C
+- Température de brillance dans le canal infrarouge 10.8 microns.
+- CAPE de la particule la plus instable en basses couches avec coefficient d'entraînement.
+- Diagnositc de grêle
+- Quantité de précipitations sous forme liquide.
+- **Rafale de vent sur 15  minutes en niveaux hauteur.**
+- **Rafale de vent en niveaux hauteur**
+- **Rafale de vent en niveaux hauteur sur une heure**
+- Quantité de graupel
+- Quantité de grêle
+- Humidité relative en niveaux hauteur.
+- Convergence d’humidité
+- Nébulosité de l'étage inférieur.
+- Quantité de précipitations sous forme de neige.
+- Quantité totale de précipitations.
+- Quantité de précipitations solides
+- Type de précipitation le plus sévère sur 15 minutes
+- Pression réduite au niveau de la mer
+- Réflectivité maximale en dBz
+- Intensité des précipitations
+- Température du point de rosée
+- Température au sol
+- Température de l'air en niveaux hauteur.
+- **composante zonale de la rafale du vent sur 15 minutes, en niveau hauteur**
+- **composante zonale de la rafale du vent, en niveaux hauteur**
+- Visibilité mini sous précipitations sur 15 minutes
+- Visibilité mini sur 15 minutes
+- **composante méridienne de la rafale du vent sur 15 minutes, en niveau hauteur**
+- **composante méridienne de la rafale du vent, en niveau hauteur**
+- Température du bulbe mouillé
 
 
 Pour chaque calque est suffixé un horodatage et c'est la requête `GetCapabilities` qui nous donne les horodatages disponibles.
 
-- `___2024-09-18T06.00.00Z_PT1H`
-- `___2024-09-18T06.00.00Z_PT3H`
-- `___2024-09-18T06.00.00Z_PT6H`
+```
+___2024-09-18T06.00.00Z
+___2024-09-18T07.00.00Z
+___2024-09-18T08.00.00Z
+```
 
 
-Récupération des composantes U et V de la rafale du vent
+sélection des identifiants qui nous intéresseront (filtrage: contient le terme `WIND` avec l'horodatage le plus récent)
+
+```
+WIND_SPEED_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z_PT15M
+WIND_SPEED_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z_PT30M
+WIND_SPEED_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z_PT1H
+WIND_SPEED_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z_PT3H
+WIND_SPEED_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z_PT6H
+
+WIND_SPEED_MAXIMUM_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z_PT1H
+WIND_SPEED_MAXIMUM_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z_PT3H
+WIND_SPEED_MAXIMUM_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z_PT6H
+
+WIND_SPEED_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z
+
+U_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z
+U_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z
+V_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z
+V_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z
+```
+
+Détails sur les données en rapport avec les rafales de vent.
+Les valeurs sont exprimées en m/s.
+
+- `U_COMPONENT_OF_WIND_GUST` : composante zonale
+- `V_COMPONENT_OF_WIND_GUST` : composante méridienne
+- `WIND_SPEED_GUST`          : magnitude
+- `WIND_SPEED_MAXIMUM_GUST`  : magnitude maximale
+
+- `` : pas précisé donc sur une heure
+- `_15min` : sur 15 minutes
+
+- `_PT15M` `_PT30M`, `_PT1H`, `_PT3H`, `_PT6H` : sur une durée de 1, 3, 6 heures
+
+on souhaite avoir la composante zonale et méridienne, cela nous restreint tout de suite dans nos choix
+
+
+Effectuons des requêtes `DescribeCoverage` sur les `ids` qui nous intéressent `U_COMPONENT_OF_xxx`/`V_COMPONENT_OF_xxx`.
+
+Cela nous apprend que nous aurons besoin de spécifier 4 paramètres pour nos requêtes `GetCoverage` :
+
+- `long(x1,x2)`
+- `lat(y1,y2)`
+- `time` : qui est l'horodatage de la prévision souhaitée.
+- `height` : correspond à la hauteur par rapport au niveau du sol. seule la valeur `10` est disponible
+
+l'horodatage de la prévision dépend du calque
+- +1h à +6h par palier de 1h pour les mesures sur 1 heure
+- +15min à +6h par palier de 15min pour les mesures sur 15 minutes.
+
+
+On choisira donc les 2 derniers.
+
+- `U_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND` + horodatage
+composante zonale de la rafale du vent, en niveaux hauteur m/s (instantané)
+
+- `V_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND` + horodatage
+composante méridienne de la rafale du vent, en niveau hauteur m/s (instantané)
+
+U_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z
+V_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z
+
 
 Exemple de récupération d'un geotiff dans l'emprise de la france métropolitaine
 
@@ -78,7 +145,7 @@ Exemple de récupération d'un geotiff dans l'emprise de la france métropolitai
 https://public-api.meteofrance.fr/public/aromepi/1.0/wcs/MF-NWP-HIGHRES-AROMEPI-001-FRANCE-WCS/GetCoverage?
 service=WCS&
 version=2.0.1&
-coverageid=U_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z&
+coverageid=U_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z&
 format=image/tiff&
 subset=long(-5.6,10.2)&
 subset=lat(40.8,52)&

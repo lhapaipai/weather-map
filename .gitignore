@@ -1,5 +1,9 @@
 node_modules/
 dist/
-scripts/raw
 
-.env.local
+scripts/data
+public/2024-09-20T060000
+
+.env
+
+api/*.bru

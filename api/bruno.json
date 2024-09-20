@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Météo France",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
