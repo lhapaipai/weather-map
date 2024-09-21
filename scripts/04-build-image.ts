@@ -5,6 +5,7 @@ import { PNG } from "pngjs";
 import { fileURLToPath } from "node:url";
 import { mkdir, readdir, unlink, writeFile } from "node:fs/promises";
 import { fileExists } from "./lib/file-util";
+import { getFileDateFromFilename, parseFileDate, toISOString } from "./lib/date-util";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const dataDir = resolve(scriptDir, "data");
@@ -12,16 +13,16 @@ const publicDir = resolve(scriptDir, "../public");
 
 const source = "https://portail-api.meteofrance.fr";
 
-type Report = {
+type ImageInfo = {
   filename: string;
   source: string;
-  datetime: string;
+  date: string;
   bbox: number[];
   width: number;
   height: number;
   min: number;
   max: number;
-}[];
+};
 
 function prepareValue(val: number) {
   return val * 100 + 32768;
@@ -54,20 +55,21 @@ export async function buildImages(dirname?: string, force = false) {
 
   const uvFiles = uFiles
     .map((uFile) => {
-      const isoTime = uFile.substring(0, 17);
-      const vFile = `${isoTime}-v-wind.tiff`;
-      return vFiles.includes(vFile) ? [isoTime, uFile, vFile] : null;
+      const fileDate = getFileDateFromFilename(uFile);
+      const vFile = `${fileDate}-v-wind.tiff`;
+      return vFiles.includes(vFile) ? [fileDate, uFile, vFile] : null;
     })
     .filter((f) => f !== null);
 
-  console.log(uvFiles);
+  const imageInfos: ImageInfo[] = [];
 
-  const report: Report = [];
+  for (const [fileDate, uFilename, vFilename] of uvFiles) {
+    const date = parseFileDate(fileDate);
+    const filename = `${fileDate}-wind.png`;
 
-  for (const [datetime, uFilename, vFilename] of uvFiles) {
-    const filename = `${datetime}-wind.png`;
     const dstPng = resolve(dstDir, filename);
-    const dstJson = resolve(dstDir, `${datetime}-wind.json`);
+    const dstJson = resolve(dstDir, `${fileDate}-wind.json`);
+
     if ((await fileExists(dstPng)) && (await fileExists(dstJson))) {
       if (!force) {
         console.log(`[skip] ${dstPng} already exists`);
@@ -124,15 +126,47 @@ export async function buildImages(dirname?: string, force = false) {
 
     png.pack().pipe(createWriteStream(dstPng));
 
-    const jsonContent = { filename, source, datetime, bbox, width, height, min, max };
+    const jsonContent = {
+      filename,
+      source,
+      date: toISOString(date),
+      bbox,
+      width,
+      height,
+      min,
+      max,
+    };
     await writeFile(dstJson, JSON.stringify(jsonContent, null, 2) + "\n", { encoding: "utf-8" });
 
-    report.push(jsonContent);
+    imageInfos.push(jsonContent);
   }
 
-  await writeFile(resolve(dstDir, "report.json"), JSON.stringify(report, null, 2) + "\n", {
-    encoding: "utf-8",
-  });
+  const { bbox, width, height } = imageInfos[0];
+
+  const min = imageInfos.reduce((prev, imageInfo) => Math.min(prev, imageInfo.min), +Infinity);
+  const max = imageInfos.reduce((prev, imageInfo) => Math.max(prev, imageInfo.max), -Infinity);
+
+  await writeFile(
+    resolve(dstDir, "manifest.json"),
+    JSON.stringify(
+      {
+        source,
+        bbox,
+        width,
+        height,
+        dateStart: imageInfos[0].date,
+        dateEnd: imageInfos.at(-1)?.date,
+        min,
+        max,
+        textures: imageInfos.map(({ min, max, filename, date }) => ({ min, max, filename, date })),
+      },
+      null,
+      2,
+    ) + "\n",
+    {
+      encoding: "utf-8",
+    },
+  );
 }
 
-buildImages();
+buildImages(undefined, true);

@@ -7,3 +7,20 @@ export type WindData = {
   min: number;
   max: number;
 };
+
+export type Manifest = {
+  source: string;
+  bbox: number[];
+  width: number;
+  height: number;
+  dateStart: string;
+  dateEnd: string;
+  min: number;
+  max: number;
+  textures: {
+    min: number;
+    max: number;
+    date: string;
+    filename: string;
+  }[];
+};

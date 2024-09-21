@@ -1,10 +1,11 @@
 import { Feature, MultiPolygon } from "geojson";
-import BoundaryCanvas from "../lib/BoundaryCanvas";
+import BoundaryCanvas from "~/lib/BoundaryCanvas";
+import "../style.css";
 import "./style.css";
-import WindMap from "../WindMap";
+import WindMap from "./WindMap";
 import GUI from "lil-gui";
-import { Legend } from "../lib/Legend";
-import { WindTextureHelper } from "../lib/WindTextureHelper";
+import { Legend } from "~/lib/Legend";
+import { Manifest } from "~/types";
 
 const gui = new GUI();
 
@@ -22,28 +23,51 @@ const windSpeedRampColor = {
   120: "#40000c",
 };
 
+const dateElt = document.querySelector<HTMLSpanElement>("#date")!;
+const hoursElt = document.querySelector<HTMLSpanElement>("#hours")!;
+
 const windCanvas = document.querySelector<HTMLCanvasElement>("#wind")!;
 const windMap = new WindMap(windCanvas, windSpeedRampColor);
 
 new Legend(windSpeedRampColor);
 
-gui.add(windMap, "numParticles", 1024, 589824);
-gui.add(windMap, "fadeOpacity", 0.01, 0.999).step(0.001);
-gui.add(windMap, "speedFactor", 0.05, 1.0);
-gui.add(windMap, "dropRate", 0, 0.1);
-gui.add(windMap, "dropRateBump", 0, 0.2);
-gui
-  .add(new WindTextureHelper(windMap, "wind_2024-09-18T06.00.00Z"), "value", [
-    "wind_2024-09-18T06.00.00Z",
-    "wind_debug",
-  ])
-  .name("texture");
+gui.add(windMap, "numParticles", 1024, 589824).name("Nombre particules");
+gui.add(windMap, "fadeOpacity", 0.01, 0.999).step(0.001).name("Opacité de la trainée");
+gui.add(windMap, "speedFactor", 0.05, 1.0).name("Vitesse particules");
+gui.add(windMap, "dropRate", 0, 0.1).name("Longévité 1");
+gui.add(windMap, "dropRateBump", 0, 0.2).name("Longévité 2");
+gui.add(windMap, "timelineSpeedFactor", 0, 14400).step(600).name("Facteur de vitesse");
 
-const franceBBox = [-5.584626288659794, 40.774618181818184, 10.225373711340218, 51.984618181818185];
+Promise.all([
+  fetch("/wind-map/metropole.geojson").then((res) => res.json()) as Promise<Feature<MultiPolygon>>,
+  fetch("/wind-map/2024-09-21_12-00-00/manifest.json").then((res) =>
+    res.json(),
+  ) as Promise<Manifest>,
+]).then(([metropoleData, manifest]) => {
+  const boundaryCanvas = document.querySelector<HTMLCanvasElement>("#boundary")!;
+  new BoundaryCanvas(boundaryCanvas, metropoleData, manifest.bbox);
 
-fetch("/wind-map/metropole.geojson")
-  .then((res) => res.json())
-  .then((metropoleData: Feature<MultiPolygon>) => {
-    const boundaryCanvas = document.querySelector<HTMLCanvasElement>("#boundary")!;
-    new BoundaryCanvas(boundaryCanvas, metropoleData, franceBBox);
-  });
+  gui
+    .add(
+      windMap,
+      "timeCurrent",
+      new Date(manifest.dateStart).getTime() / 1000,
+      new Date(manifest.dateEnd).getTime() / 1000,
+    )
+    .onFinishChange(() => {
+      windMap.isPlaying = true;
+    })
+    .name("Timestamp")
+    .listen();
+  windMap.setTimeline(manifest, "/wind-map/2024-09-21_12-00-00/");
+  windMap.onFrame = (timeCurrent) => {
+    const date = new Date(timeCurrent * 1000);
+    dateElt.textContent = date.toLocaleDateString("fr-FR", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    hoursElt.textContent = date.getHours().toString();
+  };
+});

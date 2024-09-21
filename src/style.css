@@ -31,14 +31,14 @@ html {
   flex-direction: column;
   align-items: center;
   color: #444;
-  font-size: .9rem;
+  font-size: 0.9rem;
   margin-top: 1rem;
 }
 .colors {
   display: flex;
   align-items: center;
-  font-size: .8rem;
-  margin-bottom: .5rem;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
 }
 
 .group {
@@ -58,4 +58,16 @@ html {
 .rectangle {
   width: 25px;
   height: 15px;
+}
+
+.lil-gui {
+  --background-color: #f6f6f6;
+  --text-color: #3d3d3d;
+  --title-background-color: #efefef;
+  --title-text-color: #3d3d3d;
+  --widget-color: #eaeaea;
+  --hover-color: #f0f0f0;
+  --focus-color: #fafafa;
+  --number-color: #3d3d3d;
+  --string-color: #8da300;
 }

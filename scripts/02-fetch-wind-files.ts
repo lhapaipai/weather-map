@@ -2,7 +2,7 @@ import { mkdir, readdir, readFile } from "fs/promises";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import "dotenv/config";
-import { toFileString, toISOString } from "./lib/date-util";
+import { dateToFilename, toISOString } from "./lib/date-util";
 import { downloadFile } from "./lib/file-util";
 
 const apikey = process.env.MF_APIKEY!;
@@ -66,27 +66,27 @@ const uLayers = intervals.map((interval) => {
   const date = new Date(timestamp + interval * 1000);
   return {
     url: `${aromeServer}${getCoverageUrl}?${getCoverageParams}&coverageid=${uComponent}&${bbox}&subset=time(${toISOString(date)})&subset=height(10)`,
-    filename: `${toFileString(date)}-u-wind.tiff`,
+    filename: `${dateToFilename(date)}-u-wind.tiff`,
   };
 });
 const vLayers = intervals.map((interval) => {
   const date = new Date(timestamp + interval * 1000);
   return {
     url: `${aromeServer}${getCoverageUrl}?${getCoverageParams}&coverageid=${vComponent}&${bbox}&subset=time(${toISOString(date)})&subset=height(10)`,
-    filename: `${toFileString(date)}-v-wind.tiff`,
+    filename: `${dateToFilename(date)}-v-wind.tiff`,
   };
 });
 
 const layers = [...uLayers, ...vLayers];
 // const layers = [uLayers[0]];
 
-await mkdir(resolve(dataDir, `raw/${toFileString(currentDate)}`), { recursive: true });
+await mkdir(resolve(dataDir, `raw/${dateToFilename(currentDate)}`), { recursive: true });
 
 for (const { url, filename } of layers) {
   await downloadFile(
     url,
     { headers: { apikey } },
-    resolve(dataDir, `raw/${toFileString(currentDate)}/${filename}`),
+    resolve(dataDir, `raw/${dateToFilename(currentDate)}/${filename}`),
     forceDownload,
   );
 }

@@ -3,6 +3,8 @@ import { fileURLToPath } from "url";
 import "dotenv/config";
 import { XMLParser } from "fast-xml-parser";
 import { writeFile } from "fs/promises";
+import { dateToFilename } from "./lib/date-util";
+import fetch from "node-fetch";
 
 const apikey = process.env.MF_APIKEY!;
 const scriptDir = dirname(fileURLToPath(import.meta.url));
@@ -32,9 +34,9 @@ if (!matches) {
 }
 const [_, dateStr, hours, min, sec] = matches;
 
-const now = `${dateStr}T${hours}${min}${sec}`;
+const currentDate = new Date(`${dateStr}T${hours}:${min}:${sec}Z`);
 
 writeFile(
-  resolve(dataDir, `get-capabilities/${now}.json`),
+  resolve(dataDir, `get-capabilities/${dateToFilename(currentDate)}.json`),
   JSON.stringify(capabilities, undefined, 2),
 );

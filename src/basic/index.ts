@@ -1,10 +1,10 @@
 import { Feature, MultiPolygon } from "geojson";
 import BoundaryCanvas from "~/lib/BoundaryCanvas";
 import "./style.css";
-import WindMap from "~/WindMap";
+import WindMap from "./WindMap";
 import GUI from "lil-gui";
 import { Legend } from "~/lib/Legend";
-import { WindTextureHelper } from "~/lib/gui/WindTextureHelper";
+import { WindTextureHelper } from "./WindTextureHelper";
 
 const gui = new GUI();
 

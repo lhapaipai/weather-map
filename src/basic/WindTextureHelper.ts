@@ -1,6 +1,6 @@
 import { WindData } from "~/types";
-import WindMap from "~/WindMap";
-import { dataImageLoader } from "../util";
+import WindMap from "./WindMap";
+import { dataImageLoader } from "~/lib/util";
 
 export class WindTextureHelper {
   private declare _value: string;
