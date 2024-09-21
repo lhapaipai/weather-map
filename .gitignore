@@ -3,7 +3,6 @@ dist/
 
 scripts/data
 public/2024-09-20_06-00-00
-public/2024-09-21_12-00-00
 .env
 
 api/*.bru
