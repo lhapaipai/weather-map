@@ -69,6 +69,7 @@ Liste des calques disponibles
 
 Pour chaque calque est suffixé un horodatage et c'est la requête `GetCapabilities` qui nous donne les horodatages disponibles.
 
+Attention l'horodatage est inhabituel avec des points.
 ```
 ___2024-09-18T06.00.00Z
 ___2024-09-18T07.00.00Z
@@ -119,7 +120,7 @@ Cela nous apprend que nous aurons besoin de spécifier 4 paramètres pour nos re
 
 - `long(x1,x2)`
 - `lat(y1,y2)`
-- `time` : qui est l'horodatage de la prévision souhaitée.
+- `time` : qui est l'horodatage de la prévision souhaitée. (ici le format n'est pas avec les points)
 - `height` : correspond à la hauteur par rapport au niveau du sol. seule la valeur `10` est disponible
 
 l'horodatage de la prévision dépend du calque
@@ -129,14 +130,11 @@ l'horodatage de la prévision dépend du calque
 
 On choisira donc les 2 derniers.
 
-- `U_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND` + horodatage
+- `U_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND` + horodatage
 composante zonale de la rafale du vent, en niveaux hauteur m/s (instantané)
 
-- `V_COMPONENT_OF_WIND_GUST__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND` + horodatage
+- `V_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND` + horodatage
 composante méridienne de la rafale du vent, en niveau hauteur m/s (instantané)
-
-U_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z
-V_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2024-09-18T06.00.00Z
 
 
 Exemple de récupération d'un geotiff dans l'emprise de la france métropolitaine

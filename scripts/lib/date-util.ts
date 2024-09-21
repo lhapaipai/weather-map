@@ -29,9 +29,11 @@ export function toFileString(date: Date) {
     pad(date.getUTCMonth() + 1) +
     "-" +
     pad(date.getUTCDate()) +
-    "T" +
+    "_" +
     pad(date.getUTCHours()) +
+    "-" +
     pad(date.getUTCMinutes()) +
+    "-" +
     pad(date.getUTCSeconds())
   );
 }

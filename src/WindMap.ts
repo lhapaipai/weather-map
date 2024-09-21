@@ -7,7 +7,7 @@ import {
   createTexture,
   ProgramInfos,
   resizeCanvasToDisplaySize,
-} from "./webgl-utils";
+} from "./lib/webgl-utils";
 
 import drawVert from "./shaders/draw.vert";
 import drawFrag from "./shaders/draw.frag";
@@ -26,6 +26,7 @@ export default class WindMap {
 
   public dropRate = 0.003;
   public dropRateBump = 0.01;
+  public debug = false;
 
   private frameBuffer: WebGLFramebuffer;
 
@@ -33,7 +34,10 @@ export default class WindMap {
   private declare particlePositionNext: WebGLTexture;
   private declare particleIndexBuffer: WebGLBuffer;
 
-  private windTexture: WebGLTexture;
+  private wind: {
+    data: WindData;
+    texture: WebGLTexture;
+  } | null = null;
   private colorRampTexture: WebGLTexture;
   private gl: WebGL2RenderingContext;
 
@@ -49,10 +53,18 @@ export default class WindMap {
     uv: WebGLBuffer;
   };
 
+  setWind(windData: WindData, windImage: HTMLImageElement) {
+    const { gl } = this;
+    this.wind = {
+      data: windData,
+      texture: createTexture(gl, gl.LINEAR, windImage),
+    };
+    bindTextureUnit(gl, this.wind.texture, 0);
+    requestAnimationFrame(this.render);
+  }
+
   constructor(
     public canvas: HTMLCanvasElement,
-    public windData: WindData,
-    windImage: HTMLImageElement,
     public windSpeedRampColor: Record<number, string>,
   ) {
     const gl = canvas.getContext("webgl2")!;
@@ -63,9 +75,6 @@ export default class WindMap {
 
     this.gl = gl;
     this.frameBuffer = gl.createFramebuffer()!;
-
-    this.windTexture = createTexture(gl, gl.LINEAR, windImage);
-    bindTextureUnit(gl, this.windTexture, 0);
 
     this.colorRampTexture = createTexture(
       gl,
@@ -147,6 +156,9 @@ export default class WindMap {
   }
 
   render = () => {
+    if (!this.wind) {
+      return;
+    }
     const { gl } = this;
     if (resizeCanvasToDisplaySize(this.canvas)) {
       this.initTextures();
@@ -212,6 +224,9 @@ export default class WindMap {
   }
 
   updateParticles() {
+    if (!this.wind) {
+      return;
+    }
     const { gl } = this;
     const res = Math.sqrt(this._numParticles);
 
@@ -227,8 +242,8 @@ export default class WindMap {
     gl.uniform1i(locations.u_wind, 0);
     gl.uniform1i(locations.u_particle_position_current, 2);
 
-    gl.uniform2f(locations.u_wind_res, this.windData.width, this.windData.height);
-    gl.uniform4fv(locations.u_bbox, this.windData.bbox);
+    gl.uniform2f(locations.u_wind_res, this.wind.data.width, this.wind.data.height);
+    gl.uniform4fv(locations.u_bbox, this.wind.data.bbox);
     gl.uniform1f(locations.u_speed_factor, this.speedFactor);
 
     /** todo:begin */
