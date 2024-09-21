@@ -17,7 +17,7 @@ import squareVert from "~/shaders/square.vert";
 import updateFrag from "~/shaders/update-timeline.frag";
 import screenFrag from "~/shaders/screen.frag";
 
-import { Manifest, WindData } from "~/types";
+import { Manifest } from "~/types";
 import { dataImageLoader } from "~/lib/util";
 
 export default class WindMap {
@@ -38,11 +38,6 @@ export default class WindMap {
   private declare particlePositionCurrent: WebGLTexture;
   private declare particlePositionNext: WebGLTexture;
   private declare particleIndexBuffer: WebGLBuffer;
-
-  private wind: {
-    data: WindData;
-    texture: WebGLTexture;
-  } | null = null;
 
   private manifest: Manifest | null = null;
   public timeStart = 0; // all time values unit is second.
