@@ -25,80 +25,56 @@ type ImageInfo = {
   max: number;
 };
 
-function prepareValue(val: number) {
-  return val * 100 + 32768;
-}
-
-type BuildImagesOptions = {
+type BuildPrecipitationImagesOptions = {
   aromePiGrid: string;
-  uParam: string;
-  vParam: string;
-  dstDirname: string;
+  param: string;
 
   dateDir?: string;
   force?: boolean;
   useRaw?: boolean;
 };
 
-export async function buildWindImages({
+export async function buildPrecipitationImages({
   aromePiGrid,
-  uParam,
-  vParam,
+  param,
   dateDir,
-  dstDirname,
-  force = false,
+  force = true,
   useRaw = false,
-}: BuildImagesOptions) {
+}: BuildPrecipitationImagesOptions) {
   const gridDir = aromePiGrids[aromePiGrid];
-  const uParamDir = aromePiParams[uParam];
-  const vParamDir = aromePiParams[vParam];
+  const paramDir = aromePiParams[param];
 
   const baseDir = useRaw ? dataDir : tmpDir;
 
   if (!dateDir) {
-    const lowDirnames = await readdir(join(baseDir, `${gridDir}/${uParamDir}`));
+    const lowDirnames = await readdir(join(baseDir, `${gridDir}/${paramDir}`));
 
     if (lowDirnames.length === 0) {
-      throw new Error("no dir inside low dir run 03-resize first");
+      throw new Error("no dir inside tmp dir run resize first");
     }
 
     dateDir = lowDirnames.sort().at(-1);
   }
 
-  const uSrcDir = join(baseDir, `${gridDir}/${uParamDir}/${dateDir}`);
-  const vSrcDir = join(baseDir, `${gridDir}/${vParamDir}/${dateDir}`);
-  const dstDir = join(publicDir, `${gridDir}/${dstDirname}/${dateDir}`);
+  const srcDir = join(baseDir, `${gridDir}/${paramDir}/${dateDir}`);
+  const dstDir = join(publicDir, `${gridDir}/${paramDir}/${dateDir}`);
 
-  if (!(await fileExists(uSrcDir))) {
-    throw new Error(`${uSrcDir} doesn't exists`);
-  }
-  if (!(await fileExists(vSrcDir))) {
-    throw new Error(`${vSrcDir} doesn't exists`);
+  if (!(await fileExists(srcDir))) {
+    throw new Error(`${srcDir} doesn't exists`);
   }
 
   await mkdir(dstDir, { recursive: true });
 
-  const uFilenames = await readdir(uSrcDir);
-  const vFilenames = await readdir(vSrcDir);
-
-  const uFiles = uFilenames.filter((f) => f.endsWith(".tiff")).sort();
-  const vFiles = vFilenames.filter((f) => f.endsWith(".tiff")).sort();
-
-  const uvFiles = uFiles
-    .map((uFile) => {
-      const fileDate = getFileDateFromFilename(uFile);
-      const vFile = `${fileDate}.tiff`;
-      return vFiles.includes(vFile) ? [fileDate, uFile, vFile] : null;
-    })
-    .filter((f) => f !== null);
+  const filenames = (await readdir(srcDir)).filter((f) => f.endsWith(".tiff")).sort();
 
   const imageInfos: ImageInfo[] = [];
 
-  for (const [fileDate, uFilename, vFilename] of uvFiles) {
+  for (const tiffFilename of filenames) {
+    const fileDate = getFileDateFromFilename(tiffFilename);
     const date = parseFileDate(fileDate);
-    const filename = `${fileDate}.png`;
+    const pngFilename = `${fileDate}.png`;
 
-    const dstPng = join(dstDir, filename);
+    const dstPng = join(dstDir, pngFilename);
     const dstJson = join(dstDir, `${fileDate}.json`);
 
     if ((await fileExists(dstPng)) && (await fileExists(dstJson))) {
@@ -112,20 +88,16 @@ export async function buildWindImages({
     }
     console.log(`[build-image] ${dstPng}`);
 
-    const uTiff = await fromFile(join(uSrcDir, uFilename));
-    const uImage = await uTiff.getImage();
-    const uRaster = (await uImage.readRasters())[0] as TypedArray;
+    const tiff = await fromFile(join(srcDir, tiffFilename));
+    const image = await tiff.getImage();
+    const raster = (await image.readRasters())[0] as TypedArray;
 
-    const vTiff = await fromFile(join(vSrcDir, vFilename));
-    const vImage = await vTiff.getImage();
-    const vRaster = (await vImage.readRasters())[0] as TypedArray;
-
-    const width = uImage.getWidth();
-    const height = uImage.getHeight();
-    const bbox = uImage.getBoundingBox();
+    const width = image.getWidth();
+    const height = image.getHeight();
+    const bbox = image.getBoundingBox();
 
     const png = new PNG({
-      colorType: 6, // colortype 0 (grayscale), colortype 2 (RGB), colortype 4 (grayscale alpha) and colortype 6 (RGBA)
+      colorType: 2, // colortype 0 (grayscale), colortype 2 (RGB), colortype 4 (grayscale alpha) and colortype 6 (RGBA)
       filterType: 4,
       width,
       height,
@@ -139,26 +111,22 @@ export async function buildWindImages({
         const i = (y * width + x) * 4;
         const k = y * width + x;
 
-        const uVal = uRaster[k];
-        const vVal = vRaster[k];
+        const val = raster[k];
 
-        const normalizedU = prepareValue(uVal);
-        const normalizedV = prepareValue(vVal);
+        min = Math.min(min, val);
+        max = Math.max(max, val);
 
-        min = Math.min(min, Math.sqrt(uVal * uVal + vVal * vVal));
-        max = Math.max(max, Math.sqrt(uVal * uVal + vVal * vVal));
-
-        png.data[i + 0] = Math.floor(normalizedU / 256);
-        png.data[i + 1] = Math.floor(normalizedV / 256);
-        png.data[i + 2] = Math.floor(normalizedU) % 256;
-        png.data[i + 3] = Math.floor(normalizedV) % 256;
+        png.data[i + 0] = Math.floor(val / 256);
+        png.data[i + 1] = Math.floor(val) % 256;
+        png.data[i + 2] = 0;
+        png.data[i + 3] = 255;
       }
     }
 
     png.pack().pipe(createWriteStream(dstPng));
 
     const jsonContent = {
-      filename,
+      filename: pngFilename,
       source: aromePiServer,
       date: toISOString(date),
       bbox,

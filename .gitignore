@@ -4,6 +4,7 @@ dist/
 scripts/data
 scripts/tmp
 
+public/AROMEPI-0025
 public/AROMEPI-001
 !public/AROMEPI-001/UV_WIND_15MIN/2024-09-21_12-00-00
 

@@ -10,7 +10,7 @@ const width = 100;
 const height = 100;
 const bbox = [-5.584626288659794, 40.774618181818184, 10.225373711340218, 51.984618181818185];
 const png = new PNG({
-  colorType: 6,
+  colorType: 6, // colortype 0 (grayscale), colortype 2 (RGB), colortype 4 (grayscale alpha) and colortype 6 (RGBA)
   filterType: 4,
   width,
   height,

@@ -68,3 +68,25 @@ export function parseFileDate(fileDate: string) {
   const [, year, month, day, hours, minutes, seconds] = matches;
   return new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`);
 }
+
+/**
+ * fileDate: "2024-09-20_06-15-00"
+ * return  : "2024-09-20T06.15.00Z"
+ */
+export function fileDateToMfDate(fileDate: string) {
+  const date = parseFileDate(fileDate);
+  return (
+    date.getUTCFullYear() +
+    "-" +
+    pad(date.getUTCMonth() + 1) +
+    "-" +
+    pad(date.getUTCDate()) +
+    "T" +
+    pad(date.getUTCHours()) +
+    "." +
+    pad(date.getUTCMinutes()) +
+    "." +
+    pad(date.getUTCSeconds()) +
+    "Z"
+  );
+}

@@ -2,7 +2,7 @@ import { mkdir, readdir, readFile } from "fs/promises";
 import { dirname, join, resolve } from "path";
 import { fileURLToPath } from "url";
 import "dotenv/config";
-import { dateToFilename, toISOString } from "./util/date";
+import { dateToFilename, fileDateToMfDate, toISOString } from "./util/date";
 import { downloadFile } from "./util/file";
 import { stringifyParams } from "./util/url";
 import { aromePiGrids, aromePiParams, aromePiServer } from "../config";
@@ -15,6 +15,7 @@ const dataDir = resolve(scriptDir, "../data");
 type FetchOptions = {
   aromePiGrid: string;
   param: string;
+  dateDir?: string;
   force?: boolean;
   subset: string[];
   timeIntervalSubset?: number;
@@ -24,6 +25,7 @@ export async function fetchFile({
   aromePiGrid,
   param,
   force = false,
+  dateDir,
   subset,
   timeIntervalSubset,
 }: FetchOptions) {
@@ -36,8 +38,9 @@ export async function fetchFile({
     throw new Error("GetCapabilities doesn't exists run 01-get-capabilities.ts first");
   }
 
-  const lastFile = files.sort().at(-1);
-  const capabilitiesContent = await readFile(join(capabilitiesDir, lastFile!), {
+  const capabilitiesFile = files.sort().at(-1)!;
+
+  const capabilitiesContent = await readFile(join(capabilitiesDir, capabilitiesFile!), {
     encoding: "utf-8",
   });
 
@@ -46,14 +49,25 @@ export async function fetchFile({
   const coverages = capabilities.Capabilities.Contents.CoverageSummary;
   const coverageIds: string[] = coverages.map((c) => c.CoverageId);
 
-  const lastCoverageId = coverageIds
-    .filter((id) => id.startsWith(param))
-    .sort()
-    .at(-1)!;
+  let coverageId;
 
-  const matches = lastCoverageId.match(/___([-0-9]*)T([0-9]{2})\.([0-9]{2})\.([0-9]{2})Z$/);
+  if (!dateDir) {
+    const lastCoverageId = coverageIds
+      .filter((id) => id.startsWith(param))
+      .sort()
+      .at(-1)!;
+    coverageId = lastCoverageId;
+  } else {
+    const mfDateSuffix = fileDateToMfDate(dateDir);
+    coverageId = coverageIds.find((id) => id.endsWith(mfDateSuffix));
+  }
+  if (!coverageId) {
+    throw new Error(`Unable to find coverageId with dateDir ${dateDir}`);
+  }
+
+  const matches = coverageId.match(/___([-0-9]*)T([0-9]{2})\.([0-9]{2})\.([0-9]{2})Z$/);
   if (!matches) {
-    throw new Error(`unable to parse time ${lastCoverageId}`);
+    throw new Error(`unable to parse time ${coverageId}`);
   }
   const [_, dateStr, hours, min, sec] = matches;
 
@@ -72,7 +86,7 @@ export async function fetchFile({
     service: "WCS",
     version: "2.0.1",
     format: "image/tiff",
-    coverageid: lastCoverageId,
+    coverageid: coverageId,
     subset: subsetCopy,
   })}`;
   const filename = `${dateToFilename(date)}.tiff`;
