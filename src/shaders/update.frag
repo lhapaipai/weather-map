@@ -72,20 +72,41 @@ void main() {
   float distortion = cos(radians(mix(u_bbox[3], u_bbox[1], pos.y)));
   vec2 offset = vec2(wind.x / distortion, -wind.y) * .0001 * u_speed_factor;
 
-  pos = fract(1.+pos+offset);
+  pos = pos+offset;
 
   /** todo:begin */
     vec2 seed = (pos + v_uv) * u_rand_seed;
 
   float speed = length(wind) / 120.;
+  /**
+   * drop_rate correspond à la durée de vie d'une particule
+   * on peut allonger ou diminuer la durée de vie avec u_drop_rate
+   * les particules rapides vont également avoir tendance à s'accumuler 
+   * plus rapidement. Il convient donc de leur donner une durée de vie plus faible
+   * 
+   * plus u_drop_rate est important plus la durée de vie de la particule est courte.
+   * plus u_drop_rate_bump est important plus la vitesse de la particule raccourcira
+   * la durée de vie de la particule.
+   */
   float drop_rate = u_drop_rate + speed * u_drop_rate_bump;
   float drop = step(1.0 - drop_rate, rand(seed));
 
+  /* les valeures 1.1 et 2.9 sont subjectives */
   vec2 random_pos = vec2(
-      rand(seed + 1.3),
-      rand(seed + 2.1));
+      rand(seed + 1.1),
+      rand(seed + 2.9)
+  );
   pos = mix(pos, random_pos, drop);
-  /** todo:end */
+
+  /**
+   * si l'élément est sorti de l'écran réinitialiser sa position
+   */
+  float mask = clamp(
+    step(1.0, pos.x) + step(0., -pos.x) + step(1.0, pos.y) + step(0., -pos.y),
+    0.,
+    1.
+  );
+  pos = pos * (1.-mask) + random_pos * mask;
 
   out_color = vec4(
     (floor(pos*255.)/255.),

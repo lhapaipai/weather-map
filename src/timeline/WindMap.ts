@@ -162,13 +162,13 @@ export default class WindMap {
     const [firstTexture, ...othersTextures] = manifest.textures;
     this.timeStart = this.timeEnd = this._timeCurrent = timeStart;
 
-    const windImage = await dataImageLoader(`${assetsBase}${firstTexture.filename}`);
+    const windImage = await dataImageLoader(`${assetsBase}/${firstTexture.filename}`);
     this.windTextures = [createTexture(gl, gl.LINEAR, windImage)];
 
     requestAnimationFrame(this.render);
 
     Promise.all<HTMLImageElement>(
-      othersTextures.map(({ filename }) => dataImageLoader(`${assetsBase}${filename}`)),
+      othersTextures.map(({ filename }) => dataImageLoader(`${assetsBase}/${filename}`)),
     ).then((images) => {
       this.windTextures = [
         ...this.windTextures,

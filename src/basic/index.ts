@@ -32,8 +32,9 @@ gui.add(windMap, "fadeOpacity", 0.01, 0.999).step(0.001);
 gui.add(windMap, "speedFactor", 0.05, 1.0);
 gui.add(windMap, "dropRate", 0, 0.1);
 gui.add(windMap, "dropRateBump", 0, 0.2);
+
 gui
-  .add(new WindTextureHelper(windMap, "wind_2024-09-18_06-00-00"), "value", [
+  .add(new WindTextureHelper(windMap, "wind_debug"), "value", [
     "wind_2024-09-18_06-00-00",
     "wind_debug",
   ])

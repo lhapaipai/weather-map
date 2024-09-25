@@ -110,6 +110,7 @@ export default class WindMap {
      *  - particleIndexBuffer
      */
     this.numParticles = 53824;
+    // this.numParticles = 32;
   }
 
   set numParticles(rawVal: number) {
@@ -167,7 +168,6 @@ export default class WindMap {
 
     this.drawScreen(this.previousScreenTexture, this.fadeOpacity);
     this.drawParticles();
-    this.updateParticles();
 
     bindFramebuffer(gl, null);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -178,6 +178,8 @@ export default class WindMap {
     this.drawScreen(this.screenTexture, 1);
 
     gl.disable(gl.BLEND);
+
+    this.updateParticles();
 
     let temp = this.previousScreenTexture;
     this.previousScreenTexture = this.screenTexture;

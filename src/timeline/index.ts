@@ -38,11 +38,12 @@ gui.add(windMap, "dropRate", 0, 0.1).name("Longévité 1");
 gui.add(windMap, "dropRateBump", 0, 0.2).name("Longévité 2");
 gui.add(windMap, "timelineSpeedFactor", 0, 14400).step(600).name("Facteur de vitesse");
 
+const baseUrl = "/wind-map";
+const windDir = "/AROMEPI-001/UV_WIND_15MIN/2024-09-21_12-00-00";
+
 Promise.all([
-  fetch("/wind-map/metropole.geojson").then((res) => res.json()) as Promise<Feature<MultiPolygon>>,
-  fetch("/wind-map/2024-09-21_12-00-00/manifest.json").then((res) =>
-    res.json(),
-  ) as Promise<Manifest>,
+  fetch(`${baseUrl}/metropole.geojson`).then((res) => res.json()) as Promise<Feature<MultiPolygon>>,
+  fetch(`${baseUrl}${windDir}/manifest.json`).then((res) => res.json()) as Promise<Manifest>,
 ]).then(([metropoleData, manifest]) => {
   const boundaryCanvas = document.querySelector<HTMLCanvasElement>("#boundary")!;
   new BoundaryCanvas(boundaryCanvas, metropoleData, manifest.bbox);
@@ -59,7 +60,7 @@ Promise.all([
     })
     .name("Timestamp")
     .listen();
-  windMap.setTimeline(manifest, "/wind-map/2024-09-21_12-00-00/");
+  windMap.setTimeline(manifest, `${baseUrl}${windDir}`);
   windMap.onFrame = (timeCurrent) => {
     const date = new Date(timeCurrent * 1000);
     dateElt.textContent = date.toLocaleDateString("fr-FR", {

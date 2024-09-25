@@ -2,7 +2,12 @@ node_modules/
 dist/
 
 scripts/data
-public/2024-09-20_06-00-00
+scripts/tmp
+
+public/AROMEPI-001
+!public/AROMEPI-001/UV_WIND_15MIN/2024-09-21_12-00-00
+
+
 .env
 
 api/*.bru
