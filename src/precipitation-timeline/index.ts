@@ -10,9 +10,7 @@ import { Manifest } from "~/types";
 const gui = new GUI();
 
 const rampColor = {
-  0: "#ffffff",
-  4: "#ffffff",
-  5: "#0000ff",
+  0: "#0000ff",
   10: "#00ffff",
   20: "#00ff00",
   30: "#ffff00",

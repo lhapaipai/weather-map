@@ -93,16 +93,6 @@ export default class PrecipitationMap {
     return this._rampMaxColors;
   }
 
-  // setDataImage(metadata: ImageMetadata, precipitationImage: HTMLImageElement) {
-  //   const { gl } = this;
-  //   this.precipitation = {
-  //     data: metadata,
-  //     texture: createTexture(gl, gl.LINEAR, precipitationImage),
-  //   };
-  //   bindTextureUnit(gl, this.precipitation.texture, 2);
-  //   requestAnimationFrame(this.render);
-  // }
-
   async setTimeline(manifest: Manifest, assetsBase: string) {
     const { gl } = this;
     const timeStart = new Date(manifest.dateStart).getTime() / 1000;
