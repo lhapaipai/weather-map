@@ -4,17 +4,65 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wind Map</title>
+    <style>
+      body {
+        margin: 1rem;
+        font-family: arial;
+        color: #333;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+      }
+      a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #555;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 1px 2px #fff;
+        text-decoration: none;
+      }
+      a:hover {
+        box-shadow: 0 0 1px 1px #aaa;
+        color: #000;
+      }
+
+      img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+      }
+    </style>
   </head>
   <body>
     <ul>
       <li>
-        <a href="01-basic.html">01-basic</a>
+        <a href="wind.html">
+          <img width="600" height="680" src="src/wind/screenshot.png" />
+          <div>Vent</div>
+        </a>
       </li>
       <li>
-        <a href="02-timeline.html">02-timeline</a>
+        <a href="wind-timeline.html">
+          <img width="600" height="680" src="src/wind-timeline/screenshot.png" />
+          <div>Vent avec chronologie</div>
+        </a>
       </li>
       <li>
-        <a href="03-basic-precipitation.html">03-basic-precipitation</a>
+        <a href="precipitation.html">
+          <img width="600" height="680" src="src/precipitation/screenshot.png" />
+          <div>Précipitations</div>
+        </a>
+      </li>
+      <li>
+        <a href="precipitation-timeline.html">
+          <img width="600" height="680" src="src/precipitation-timeline/screenshot.png" />
+          <div>Précipitations avec chronologie</div>
+        </a>
       </li>
     </ul>
   </body>

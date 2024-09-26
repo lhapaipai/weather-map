@@ -12,8 +12,10 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(projectDir, "index.html"),
-        basic: resolve(projectDir, "01-basic.html"),
-        timeline: resolve(projectDir, "02-timeline.html"),
+        wind: resolve(projectDir, "wind.html"),
+        windTimeline: resolve(projectDir, "wind-timeline.html"),
+        precipitation: resolve(projectDir, "precipitation.html"),
+        precipitationTimeline: resolve(projectDir, "precipitation-timeline.html"),
       },
     },
   },

@@ -3,17 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wind Map</title>
+    <title>Timeline Precipitation Map</title>
   </head>
   <body>
     <div id="container">
+      <canvas id="principal-canvas"></canvas>
       <canvas id="boundary"></canvas>
-      <canvas id="wind"></canvas>
       <div class="timeline">
         <span id="date"></span>,
         <span class="time"> <span id="hours"></span>h</span>
       </div>
     </div>
-    <script type="module" src="./src/timeline/index.ts"></script>
+    <script type="module" src="./src/precipitation-timeline/index.ts"></script>
   </body>
 </html>

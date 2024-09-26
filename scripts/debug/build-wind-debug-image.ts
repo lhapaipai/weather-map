@@ -69,10 +69,10 @@ for (let y = 0; y < height; y++) {
   }
 }
 
-png.pack().pipe(createWriteStream(`${publicDir}/wind_debug.png`));
+png.pack().pipe(createWriteStream(`${publicDir}/basic/wind_debug.png`));
 
 writeFileSync(
-  `${publicDir}/wind_debug.json`,
+  `${publicDir}/basic/wind_debug.json`,
   JSON.stringify(
     {
       source: "https://portail-api.meteofrance.fr",

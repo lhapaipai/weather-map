@@ -22,10 +22,10 @@ const windSpeedRampColor = {
   120: "#40000c",
 };
 
-const windCanvas = document.querySelector<HTMLCanvasElement>("#wind")!;
+const windCanvas = document.querySelector<HTMLCanvasElement>("#principal-canvas")!;
 const windMap = new WindMap(windCanvas, windSpeedRampColor);
 
-new Legend(windSpeedRampColor);
+new Legend(windSpeedRampColor, "Vitesse du vent en m/s");
 
 gui.add(windMap, "numParticles", 1024, 589824);
 gui.add(windMap, "fadeOpacity", 0.01, 0.999).step(0.001);
@@ -34,8 +34,9 @@ gui.add(windMap, "dropRate", 0, 0.1);
 gui.add(windMap, "dropRateBump", 0, 0.2);
 
 gui
-  .add(new DataImageHelper(windMap, "2024-09-23_09-15-00", "basic/"), "value", [
-    "2024-09-23_09-15-00",
+  .add(new DataImageHelper(windMap, "wind_2024-09-18_06-00-00", "basic/"), "value", [
+    "wind_2024-09-18_06-00-00",
+    "wind_debug",
   ])
   .name("texture");
 

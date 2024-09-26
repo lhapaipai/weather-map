@@ -1,5 +1,5 @@
 export class Legend {
-  constructor(rampColor: Record<number, string>) {
+  constructor(rampColor: Record<number, string>, legend: string) {
     const items = Object.entries(rampColor)
       .map(([strVal, color]) => ({
         value: parseInt(strVal),
@@ -29,7 +29,7 @@ export class Legend {
     });
 
     const text = document.createElement("div");
-    text.textContent = "Vitesse du vent en m/s";
+    text.textContent = legend;
     container.append(colors, text);
 
     document.body.append(container);

@@ -22,7 +22,7 @@ for (const aromePiGrid of [
   const gridDir = aromePiGrids[aromePiGrid];
 
   const xmlCapabilities = await fetch(
-    `${mfUrl}/wcs/${gridDir}/GetCapabilities?service=WCS&version=2.0.1&language=fre`,
+    `${mfUrl}/wcs/${aromePiGrid}/GetCapabilities?service=WCS&version=2.0.1&language=fre`,
     { headers: { apikey } },
   ).then((res) => res.text());
 

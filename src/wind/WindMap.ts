@@ -10,15 +10,15 @@ import {
 } from "~/lib/webgl-utils";
 
 import drawVert from "~/shaders/draw.vert";
-import drawFrag from "~/shaders/draw-timeline.frag";
+import drawFrag from "~/shaders/draw.frag";
 
 import squareVert from "~/shaders/square.vert";
 
-import updateFrag from "~/shaders/update-timeline.frag";
+import updateFrag from "~/shaders/update.frag";
 import screenFrag from "~/shaders/screen.frag";
 
-import { Manifest } from "~/types";
-import { dataImageLoader } from "~/lib/util";
+import { ImageMetadata } from "~/types";
+import { getColorRamp } from "~/lib/color-ramp";
 
 export default class WindMap {
   public fadeOpacity = 0.975;
@@ -29,25 +29,16 @@ export default class WindMap {
   public dropRateBump = 0.01;
   public debug = false;
 
-  public timelineSpeedFactor = 1200; // 1sec = 20 min.
-
-  public onFrame: ((timeCurrent: number) => void) | null = null;
-
   private frameBuffer: WebGLFramebuffer;
 
   private declare particlePositionCurrent: WebGLTexture;
   private declare particlePositionNext: WebGLTexture;
   private declare particleIndexBuffer: WebGLBuffer;
 
-  private manifest: Manifest | null = null;
-  public timeStart = 0; // all time values unit is second.
-  public timeEnd = 0;
-  private _timeCurrent = 0;
-  public timeReferenceAnimation = 0;
-  public renderTimeStart: number | null = null;
-  private _isPlaying = false;
-  private windTextures: WebGLTexture[] = [];
-
+  private wind: {
+    metadata: ImageMetadata;
+    texture: WebGLTexture;
+  } | null = null;
   private colorRampTexture: WebGLTexture;
   private gl: WebGL2RenderingContext;
 
@@ -62,6 +53,16 @@ export default class WindMap {
     position: WebGLBuffer;
     uv: WebGLBuffer;
   };
+
+  setDataImage(metadata: ImageMetadata, windImage: HTMLImageElement) {
+    const { gl } = this;
+    this.wind = {
+      metadata,
+      texture: createTexture(gl, gl.LINEAR, windImage),
+    };
+    bindTextureUnit(gl, this.wind.texture, 5);
+    requestAnimationFrame(this.render);
+  }
 
   constructor(
     public canvas: HTMLCanvasElement,
@@ -110,6 +111,7 @@ export default class WindMap {
      *  - particleIndexBuffer
      */
     this.numParticles = 53824;
+    // this.numParticles = 32;
   }
 
   set numParticles(rawVal: number) {
@@ -153,89 +155,11 @@ export default class WindMap {
     this.screenTexture = createTexture(gl, gl.NEAREST, emptyPixels, width, height);
   }
 
-  async setTimeline(manifest: Manifest, assetsBase: string) {
-    const { gl } = this;
-    const timeStart = new Date(manifest.dateStart).getTime() / 1000;
-    const timeEnd = new Date(manifest.dateEnd).getTime() / 1000;
-
-    this.manifest = manifest;
-    const [firstTexture, ...othersTextures] = manifest.textures;
-    this.timeStart = this.timeEnd = this._timeCurrent = timeStart;
-
-    const windImage = await dataImageLoader(`${assetsBase}/${firstTexture.filename}`);
-    this.windTextures = [createTexture(gl, gl.LINEAR, windImage)];
-
-    requestAnimationFrame(this.render);
-
-    Promise.all<HTMLImageElement>(
-      othersTextures.map(({ filename }) => dataImageLoader(`${assetsBase}/${filename}`)),
-    ).then((images) => {
-      this.windTextures = [
-        ...this.windTextures,
-        ...images.map((image) => createTexture(gl, gl.LINEAR, image)),
-      ];
-      this.timeEnd = timeEnd;
-    });
-
-    this.isPlaying = true;
-  }
-
-  set isPlaying(val: boolean) {
-    this._isPlaying = val;
-    this.renderTimeStart = null;
-  }
-  get isPlaying() {
-    return this._isPlaying;
-  }
-
-  set timeCurrent(time: number) {
-    console.log("setTimecurrent", time);
-    this.isPlaying = false;
-    this._timeCurrent = time;
-  }
-
-  get timeCurrent() {
-    return this._timeCurrent;
-  }
-
-  render = (renderTimeMs: number) => {
-    if (this.windTextures.length === 0 || !this.manifest) {
+  render = () => {
+    if (!this.wind) {
       return;
     }
     const { gl } = this;
-
-    const renderTime = renderTimeMs / 1000;
-    const interval = this.timeEnd - this.timeStart;
-
-    let dt = 0;
-
-    if (this.isPlaying && interval !== 0) {
-      if (this.renderTimeStart === null) {
-        console.log("reinit time start");
-        this.renderTimeStart =
-          renderTime - (this.timeCurrent - this.timeStart) / this.timelineSpeedFactor;
-      }
-      dt = ((renderTime - this.renderTimeStart) * this.timelineSpeedFactor) % interval;
-      this._timeCurrent = this.timeStart + dt;
-    } else {
-      dt = this.timeCurrent - this.timeStart;
-    }
-
-    let prevTextureIdx = 0;
-    let nextTextureIdx = 0;
-    let textureFactor = 0;
-
-    if (this.windTextures.length > 1) {
-      const textureOffset = (this.windTextures.length * dt) / interval;
-
-      prevTextureIdx = Math.floor(textureOffset) % this.windTextures.length;
-      nextTextureIdx = Math.ceil(textureOffset) % this.windTextures.length;
-      textureFactor = textureOffset - Math.floor(textureOffset);
-    }
-
-    bindTextureUnit(gl, this.windTextures[prevTextureIdx], 5);
-    bindTextureUnit(gl, this.windTextures[nextTextureIdx], 6);
-
     if (resizeCanvasToDisplaySize(this.canvas)) {
       this.initTextures();
     }
@@ -244,8 +168,7 @@ export default class WindMap {
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     this.drawScreen(this.previousScreenTexture, this.fadeOpacity);
-    this.drawParticles(textureFactor);
-    this.updateParticles(textureFactor);
+    this.drawParticles();
 
     bindFramebuffer(gl, null);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -257,6 +180,8 @@ export default class WindMap {
 
     gl.disable(gl.BLEND);
 
+    this.updateParticles();
+
     let temp = this.previousScreenTexture;
     this.previousScreenTexture = this.screenTexture;
     this.screenTexture = temp;
@@ -265,8 +190,6 @@ export default class WindMap {
     this.particlePositionCurrent = this.particlePositionNext;
     this.particlePositionNext = temp;
     bindTextureUnit(gl, this.particlePositionCurrent, 2);
-
-    this.onFrame?.(this.timeCurrent);
 
     requestAnimationFrame(this.render);
   };
@@ -286,16 +209,14 @@ export default class WindMap {
     gl.drawArrays(gl.TRIANGLES, 0, 6);
   }
 
-  drawParticles(windTextureFactor: number) {
+  drawParticles() {
     const { gl } = this;
     const { program, locations } = this.draw;
     gl.useProgram(program);
 
     bindAttribute(gl, this.particleIndexBuffer, locations.a_index, 1);
 
-    gl.uniform1i(locations.u_wind_prev, 5);
-    gl.uniform1i(locations.u_wind_next, 6);
-    gl.uniform1f(locations.u_wind_factor, windTextureFactor);
+    gl.uniform1i(locations.u_wind, 5);
     gl.uniform1i(locations.u_color_ramp, 1);
     gl.uniform1i(locations.u_particle_position_current, 2);
     gl.uniform1f(locations.u_tex_width, Math.sqrt(this._numParticles));
@@ -303,8 +224,8 @@ export default class WindMap {
     gl.drawArrays(gl.POINTS, 0, this._numParticles);
   }
 
-  updateParticles(windTextureFactor: number) {
-    if (!this.manifest) {
+  updateParticles() {
+    if (!this.wind) {
       return;
     }
     const { gl } = this;
@@ -319,41 +240,20 @@ export default class WindMap {
     bindAttribute(gl, this.square.position, locations.a_position, 2);
     bindAttribute(gl, this.square.uv, locations.a_uv, 2);
 
-    gl.uniform1i(locations.u_wind_prev, 5);
-    gl.uniform1i(locations.u_wind_next, 6);
-    gl.uniform1f(locations.u_wind_factor, windTextureFactor);
+    gl.uniform1i(locations.u_wind, 5);
     gl.uniform1i(locations.u_particle_position_current, 2);
 
-    gl.uniform2f(locations.u_wind_res, this.manifest.width, this.manifest.height);
-    gl.uniform4fv(locations.u_bbox, this.manifest.bbox);
+    gl.uniform2f(locations.u_wind_res, this.wind.metadata.width, this.wind.metadata.height);
+    gl.uniform4fv(locations.u_bbox, this.wind.metadata.bbox);
     gl.uniform1f(locations.u_speed_factor, this.speedFactor);
 
     /** todo:begin */
     gl.uniform1f(locations.u_rand_seed, Math.random());
     gl.uniform1f(locations.u_drop_rate, this.dropRate);
     gl.uniform1f(locations.u_drop_rate_bump, this.dropRateBump);
+
     /** todo:end */
 
     gl.drawArrays(gl.TRIANGLES, 0, 6);
   }
-}
-
-function getColorRamp(colors: Record<number, string>) {
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d")!;
-
-  canvas.width = 256;
-  canvas.height = 1;
-
-  const maxSpeed = 120;
-
-  const gradient = ctx.createLinearGradient(0, 0, 256, 0);
-  for (const speed in colors) {
-    const stop = parseInt(speed) / maxSpeed;
-    gradient.addColorStop(stop, colors[speed]);
-  }
-
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 256, 1);
-  return new Uint8Array(ctx.getImageData(0, 0, 256, 1).data);
 }
