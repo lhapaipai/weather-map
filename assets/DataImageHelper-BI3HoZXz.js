@@ -1,0 +1,1 @@
+import{h as e}from"./util-hbtArgU2.js";class l{constructor(a,s,t=""){this.windMap=a,this.base=t,this.value=s}set value(a){this._value!==a&&(Promise.all([fetch(`${this.base}${a}.json`).then(s=>s.json()),e(`${this.base}${a}.png`)]).then(([s,t])=>{this.windMap.setDataImage(s,t)}),this._value=a)}get value(){return this._value}}export{l as D};
