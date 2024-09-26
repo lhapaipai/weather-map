@@ -37,7 +37,7 @@ gui.add(precipitationMap, "rampMaxColors", 2, 64);
 gui.add(precipitationMap, "opacity", 0, 1);
 gui.add(precipitationMap, "timelineSpeedFactor", 0, 14400).step(600).name("Facteur de vitesse");
 
-const baseUrl = "/wind-map";
+const baseUrl = "/weather-map";
 const windDir = "/AROMEPI-001/REFLECTIVITY/2024-09-26_08-00-00";
 
 Promise.all([

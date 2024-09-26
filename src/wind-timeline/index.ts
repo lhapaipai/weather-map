@@ -38,7 +38,7 @@ gui.add(windMap, "dropRate", 0, 0.1).name("Longévité 1");
 gui.add(windMap, "dropRateBump", 0, 0.2).name("Longévité 2");
 gui.add(windMap, "timelineSpeedFactor", 0, 14400).step(600).name("Facteur de vitesse");
 
-const baseUrl = "/wind-map";
+const baseUrl = "/weather-map";
 const windDir = "/AROMEPI-001/UV_WIND_15MIN/2024-09-21_12-00-00";
 
 Promise.all([

@@ -10,9 +10,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lhapaipai/wind-map"
+    "url": "https://github.com/lhapaipai/weather-map"
   },
-  "homepage": "https://lhapaipai.github.io/wind-map/",
+  "homepage": "https://lhapaipai.github.io/weather-map/",
   "devDependencies": {
     "@types/geojson": "^7946.0.14",
     "@typescript-eslint/eslint-plugin": "^7.17.0",

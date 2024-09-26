@@ -42,7 +42,7 @@ gui
 
 const franceBBox = [-5.584626288659794, 40.774618181818184, 10.225373711340218, 51.984618181818185];
 
-fetch("/wind-map/metropole.geojson")
+fetch("metropole.geojson")
   .then((res) => res.json())
   .then((metropoleData: Feature<MultiPolygon>) => {
     const boundaryCanvas = document.querySelector<HTMLCanvasElement>("#boundary")!;

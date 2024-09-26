@@ -6,7 +6,7 @@ import glsl from "vite-plugin-glsl";
 const projectDir = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  base: "/wind-map/",
+  base: "/weather-map/",
   plugins: [glsl()],
   build: {
     rollupOptions: {

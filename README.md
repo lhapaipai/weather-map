@@ -1,7 +1,7 @@
 # Carte du Vent WebGL2
 
 <a href="https://maplibre-react-components.pentatrion.com">
-<img src="https://raw.githubusercontent.com/lhapaipai/wind-map/main/screenshot.png" alt="Carte du Vent" />
+<img src="https://raw.githubusercontent.com/lhapaipai/weather-map/main/screenshot.png" alt="Carte du Vent" />
 </a>
 
 ## Récupération des données
