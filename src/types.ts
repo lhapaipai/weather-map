@@ -1,4 +1,4 @@
-export type WindData = {
+export type ImageMetadata = {
   source: string;
   date: string;
   width: number;

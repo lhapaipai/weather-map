@@ -17,7 +17,7 @@ import squareVert from "~/shaders/square.vert";
 import updateFrag from "~/shaders/update.frag";
 import screenFrag from "~/shaders/screen.frag";
 
-import { WindData } from "~/types";
+import { ImageMetadata } from "~/types";
 
 export default class WindMap {
   public fadeOpacity = 0.975;
@@ -35,7 +35,7 @@ export default class WindMap {
   private declare particleIndexBuffer: WebGLBuffer;
 
   private wind: {
-    data: WindData;
+    metadata: ImageMetadata;
     texture: WebGLTexture;
   } | null = null;
   private colorRampTexture: WebGLTexture;
@@ -53,10 +53,10 @@ export default class WindMap {
     uv: WebGLBuffer;
   };
 
-  setWind(windData: WindData, windImage: HTMLImageElement) {
+  setDataImage(metadata: ImageMetadata, windImage: HTMLImageElement) {
     const { gl } = this;
     this.wind = {
-      data: windData,
+      metadata,
       texture: createTexture(gl, gl.LINEAR, windImage),
     };
     bindTextureUnit(gl, this.wind.texture, 5);
@@ -242,8 +242,8 @@ export default class WindMap {
     gl.uniform1i(locations.u_wind, 5);
     gl.uniform1i(locations.u_particle_position_current, 2);
 
-    gl.uniform2f(locations.u_wind_res, this.wind.data.width, this.wind.data.height);
-    gl.uniform4fv(locations.u_bbox, this.wind.data.bbox);
+    gl.uniform2f(locations.u_wind_res, this.wind.metadata.width, this.wind.metadata.height);
+    gl.uniform4fv(locations.u_bbox, this.wind.metadata.bbox);
     gl.uniform1f(locations.u_speed_factor, this.speedFactor);
 
     /** todo:begin */

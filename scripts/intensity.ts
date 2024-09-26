@@ -2,7 +2,9 @@ import { buildPrecipitationImages } from "./lib/build-precipitation-images";
 import { fetchFile } from "./lib/fetch-file";
 import { resize } from "./lib/resize";
 
-const aromePiGrid = "MF-NWP-HIGHRES-AROMEPI-0025-FRANCE-WCS";
+const grid = "001" as "001" | "0025";
+
+const aromePiGrid = `MF-NWP-HIGHRES-AROMEPI-${grid}-FRANCE-WCS`;
 
 const param = "TOTAL_PRECIPITATION__GROUND_OR_WATER_SURFACE";
 
@@ -24,11 +26,13 @@ for (const interval of [
   });
 }
 
-// await resize({ aromePiGrid, param, dateDir });
+if (grid === "001") {
+  await resize({ aromePiGrid, param, dateDir });
+}
 
 await buildPrecipitationImages({
   dateDir,
   aromePiGrid,
   param,
-  useRaw: true,
+  useRaw: grid === "0025",
 });

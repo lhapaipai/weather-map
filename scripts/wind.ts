@@ -2,7 +2,9 @@ import { buildWindImages } from "./lib/build-wind-image";
 import { fetchFile } from "./lib/fetch-file";
 import { resize } from "./lib/resize";
 
-const aromePiGrid = "MF-NWP-HIGHRES-AROMEPI-001-FRANCE-WCS";
+const grid = "001" as "001" | "0025";
+
+const aromePiGrid = `MF-NWP-HIGHRES-AROMEPI-${grid}-FRANCE-WCS`;
 
 const uParam = "U_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND";
 const vParam = "V_COMPONENT_OF_WIND_GUST_15MIN__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND";
@@ -31,12 +33,15 @@ for (const interval of [
   });
 }
 
-await resize({ aromePiGrid, param: uParam });
-await resize({ aromePiGrid, param: vParam });
+if (grid === "001") {
+  await resize({ aromePiGrid, param: uParam });
+  await resize({ aromePiGrid, param: vParam });
+}
 
 await buildWindImages({
   aromePiGrid,
   uParam,
   vParam,
   dstDirname: "UV_WIND_15MIN",
+  useRaw: grid === "0025",
 });

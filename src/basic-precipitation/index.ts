@@ -34,9 +34,8 @@ gui.add(windMap, "dropRate", 0, 0.1);
 gui.add(windMap, "dropRateBump", 0, 0.2);
 
 gui
-  .add(new DataImageHelper(windMap, "wind_debug", "basic/"), "value", [
-    "wind_2024-09-18_06-00-00",
-    "wind_debug",
+  .add(new DataImageHelper(windMap, "2024-09-23_09-15-00", "basic/"), "value", [
+    "2024-09-23_09-15-00",
   ])
   .name("texture");
 
